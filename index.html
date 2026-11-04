@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0a0806">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Fuzzy: Road to 589 (fan game, levels 1-5)</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0a0806;color:#f6ecd2;font:16px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#cv{position:fixed;left:0;top:0;display:block}
+.ov{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:center;overflow:auto;touch-action:pan-y;background:rgba(6,4,2,.88);z-index:20;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 24px)}
+.ov.on{display:flex}
+.panel{width:100%;max-width:560px;background:#16110a;border:2px solid #b8913a;border-radius:14px;padding:16px;box-shadow:0 0 0 4px #0a0806,0 0 24px rgba(252,220,58,.15)}
+h1,h2{font-family:Impact,"Arial Black",system-ui,sans-serif;letter-spacing:1px;margin:.2em 0 .3em;color:#fcdc3a;text-shadow:2px 2px 0 #5e2c07}
+h1{font-size:34px;text-align:center}h2{font-size:24px}
+p{margin:.45em 0}
+.small{font-size:16px;color:#d8c9a3}
+.btn{display:block;width:100%;min-height:52px;margin:10px 0 0;border:2px solid #fcdc3a;border-radius:12px;background:#2b1e0c;color:#fff;font:bold 18px system-ui,sans-serif;cursor:pointer;padding:10px}
+.btn.go{background:#2e7d1a;border-color:#7ad12e}
+.btn:active{transform:scale(.98)}
+.logo{display:block;margin:0 auto 4px;height:22px;width:auto;image-rendering:auto;border-radius:3px}
+.notice{border:1px solid #765f3c;border-radius:10px;padding:8px 10px;margin:8px 0;font-size:16px;color:#f2e2b6;background:#0f0b06}
+.lvls{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+.lv{display:flex;gap:10px;align-items:center;min-height:64px;border:2px solid #765f3c;border-radius:12px;background:#21170a;color:#fff;padding:8px 10px;text-align:left;font:16px system-ui,sans-serif;cursor:pointer;width:100%}
+.lv b{display:block;font-size:18px;color:#fcdc3a}
+.lv .n{flex:0 0 44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 20px system-ui;background:#5e2c07;border:2px solid #fcdc3a}
+.lv.lock{opacity:.6;cursor:default;border-style:dashed}
+.cipher{font:bold 22px ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;background:#000;border:1px solid #765f3c;border-radius:8px;padding:10px;text-align:center;word-break:break-word;color:#7ad12e}
+.choice{display:block;width:100%;min-height:52px;margin:8px 0 0;border:2px solid #b8913a;border-radius:12px;background:#21170a;color:#fff;font:bold 17px system-ui,sans-serif;padding:8px;cursor:pointer}
+.choice.bad{border-color:#ed362e;background:#3a0d0b}
+.choice.good{border-color:#7ad12e;background:#1d3a0f}
+#pauseB{position:fixed;top:calc(env(safe-area-inset-top) + 8px);right:calc(env(safe-area-inset-right) + 8px);width:48px;height:48px;border-radius:12px;border:2px solid #b8913a;background:rgba(22,17,10,.85);color:#fff;font:bold 20px system-ui;z-index:15;display:none}
+#pad{position:fixed;width:146px;height:140px;z-index:16;display:none}
+.pb{position:absolute;width:68px;height:68px;border-radius:50%;border:3px solid rgba(0,0,0,.55);color:#fff;font:900 14px system-ui,sans-serif;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),0 3px 8px rgba(0,0,0,.5);touch-action:none;padding:0}
+.pb.on{transform:scale(.93);filter:brightness(1.25)}
+#bA{left:0;top:66px;background:#2f9d2a}      /* ACTION: green, left */
+#bJ{left:78px;top:66px;background:#f07a12}    /* JUMP: orange, right */
+#bB{left:39px;top:0;background:#7a38bd}       /* BRIDGE: extra button on top */
+#tip{position:fixed;left:calc(env(safe-area-inset-left) + 12px);z-index:14;max-width:52vw;font-size:16px;color:#d8c9a3;display:none}
+#toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 64px);background:rgba(10,8,6,.9);border:1px solid #b8913a;border-radius:10px;padding:8px 12px;font:bold 16px system-ui;z-index:17;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<button id="pauseB" type="button" aria-label="Pause">II</button>
+<div id="tip">Fuzzy runs by himself. JUMP (tap twice to double jump), ACTION smashes red FUD candles, BRIDGE spans wide water (needs a purple X kit).</div>
+<div id="toast"></div>
+<div id="pad" aria-label="Game buttons">
+  <button class="pb" id="bB" type="button" aria-label="Bridge">BRIDGE</button>
+  <button class="pb" id="bA" type="button" aria-label="Action: smash">ACTION</button>
+  <button class="pb" id="bJ" type="button" aria-label="Jump">JUMP</button>
+</div>
+
+<!-- TITLE -->
+<div class="ov on" id="oTitle"><div class="panel">
+  <img class="logo" src="logo.png" alt="FIVE8NINE">
+  <h1>FUZZY: ROAD TO 589</h1>
+  <p class="small" style="text-align:center">Fuzzybear created by @fuzzy_dev_ · @fuzzy_xrp</p>
+  <div class="notice">Fan-made tribute game, chapters 1 to 5. Not official and not affiliated with Fuzzybear, Fuzzycards or anyone named. Not financial advice: no token, no wallet, no buying anything.</div>
+  <p class="small">Fuzzy runs the riddle road: hop green candles, bust red ones, build liquidity bridges between currency islands, sail the ship Perseverancia and crack real riddles at every gate.</p>
+  <button class="btn go" id="tPlay" type="button">PLAY</button>
+  <button class="btn" id="tLv" type="button">CHAPTERS</button>
+  <button class="btn" id="tAbout" type="button">ABOUT &amp; CREDITS</button>
+</div></div>
+
+<!-- LEVELS -->
+<div class="ov" id="oLv"><div class="panel">
+  <h2>Chapters</h2>
+  <div class="lvls" id="lvList"></div>
+  <button class="btn" id="lvBack" type="button">BACK</button>
+</div></div>
+
+<!-- ABOUT -->
+<div class="ov" id="oAbout"><div class="panel">
+  <h2>About &amp; credits</h2>
+  <p>Fuzzybear ($FUZZY) was created by <b>@fuzzy_dev_</b> and is run by the Fuzzybear team at <b>@fuzzy_xrp</b> (fuzzyxrp.com). The Fuzzy TCG card game is by Fuzzycards (fuzzycards.com). All credit for Fuzzy, his lore and his riddles goes to them.</p>
+  <p>This is an unofficial fan game. All art here is drawn fresh in code in a card-game style; no official card art is used. Riddles are quoted from public posts by @fuzzy_xrp, @bearableguy123 and @321yugelbaraeb, with the dates shown at each gate.</p>
+  <div class="notice">Not financial advice. Green candles here are decoration and power-ups, not a price call. The game has no token, no wallet connection and no purchases.</div>
+  <p class="small">Chapter 6 opens after the next riddle drop.</p>
+  <button class="btn" id="abBack" type="button">BACK</button>
+</div></div>
+
+<!-- PAUSE -->
+<div class="ov" id="oPause"><div class="panel">
+  <h2>Paused</h2>
+  <button class="btn go" id="pResume" type="button">RESUME</button>
+  <button class="btn" id="pRestart" type="button">RESTART CHAPTER</button>
+  <button class="btn" id="pSound" type="button">SOUND: ON</button>
+  <button class="btn" id="pLv" type="button">CHAPTERS</button>
+</div></div>
+
+<!-- RIDDLE GATE -->
+<div class="ov" id="oRid"><div class="panel">
+  <h2 id="rT">Riddle gate</h2>
+  <p class="small" id="rSrc"></p>
+  <p id="rQ"></p>
+  <div class="cipher" id="rC"></div>
+  <p class="small" id="rHint"></p>
+  <div id="rCh"></div>
+</div></div>
+
+<!-- CLEAR / FAIL / EPILOGUE -->
+<div class="ov" id="oMsg"><div class="panel">
+  <h2 id="mT"></h2>
+  <div id="mB"></div>
+  <button class="btn go" id="mGo" type="button">NEXT</button>
+  <button class="btn" id="mLv" type="button">CHAPTERS</button>
+</div></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   FUZZY: ROAD TO 589  (fan game, Peter's Arcade family copy, fully unlocked)
+   Chapters 1-5 only. The game is deliberately NOT finished.
+   ---------------------------------------------------------------------
+   HOW TO ADD THE NEXT DROP (projected Thu Nov 5, 2026, ~10:23 AM PT):
+   1. Read the new @fuzzy_xrp post and verify the decode before using it.
+   2. Copy one object in LEVELS below, give it id 6, a title, the drop
+      date and post URL in `src`, a `script` (see chunk codes in build()),
+      a `theme`, and a `riddle` {q, cipher, hint, choices:[correct,...]}.
+   3. Delete NEXT_DROP (or point it at the drop after that).
+   4. Bump CACHE in sw.js so phones pick up the new chapter.
+   ===================================================================== */
+const LEVELS=[
+ {id:1,title:"The Bear Awakens",theme:"night",speed:240,
+  blurb:"Since 2013: hop the green candles out of the genesis woods.",
+  src:"@bearableguy123, Apr 2018 (posted on Reddit)",
+  script:"f700 d f260 r f300 g110 d f360 c f260 u f300 g130 d f300 k f220 G430 f360 o f300 r f260 d f400 E",
+  riddle:{q:"BG123's 2018 riddle hid one word in Base64 (a way computers write text as letters and numbers). What does it say?",
+   cipher:"TGlzdGVu",hint:"Hint: it's an instruction. Fuzzy's ears perk up.",choices:["Listen","Lesson","Liquid"]}},
+ {id:2,title:"Shall We Play a Game?",theme:"grid",speed:255,
+  blurb:"The Feb 18, 2026 drop: a wall clock, a code, and a game.",
+  src:"@fuzzy_xrp drop, Feb 18, 2026",
+  script:"f600 d f240 r f200 u f260 g120 c f200 d f260 g140 f200 r f160 r f300 k f200 G430 f300 u f240 C f300 o f260 d f400 E",
+  riddle:{q:"The caption was written with every letter shifted 3 places forward. Shift each letter back 3 (V becomes S, K becomes H).",
+   cipher:"VKDOO ZH SODB D JDPH?",hint:"Hint: the wall clock in the picture only clearly shows 23.",choices:["SHALL WE PLAY A GAME?","SHALL WE STAY THE SAME?","SHALL WE PAY A NAME?"]}},
+ {id:3,title:"Bridge of Liquidity",theme:"islands",speed:265,
+  blurb:"Currency islands with water between them. Build bridges so value can cross.",
+  src:"@321yugelbaraeb (BG123's mirror), Jan 1, 2019",
+  script:"f600 d f260 k f200 G430 f300 r f220 d f260 k f200 G450 f260 u f240 c f200 k f200 G430 f300 o f240 g130 f300 d f400 E",
+  riddle:{q:"The mirror account answered itself 25 times, one letter per reply. Read the replies in order:",
+   cipher:"O N E D R O P W I L L B E C O M E A M O N S O O N",hint:"Hint: a tiny drop of water, then a whole season of rain.",choices:["ONE DROP WILL BECOME A MONSOON","ONE DROP WILL BE A MOON SOON","ONE PROD WILL BECOME A MONSOON"]}},
+ {id:4,title:"X Marks the P",theme:"sea",speed:275,
+  blurb:"The Treasure Map drop: board the three-sail ship and ride out the storm.",
+  src:"@fuzzy_xrp Treasure Map drop, May 20, 2026",
+  script:"f600 d f240 g120 f240 r f200 k f200 G430 S1500 g140 f260 u f220 C f260 o f260 d f400 E",
+  riddle:{q:"The Treasure Map's caption was \"X marks the P\". What name does the map give the three-sail ship?",
+   cipher:"X marks the P",hint:"Hint: the same ship BG123 drew in 2020 with green, purple and yellow sails. The word means keep going.",choices:["Perseverancia","Prosperity","Pegasus"]}},
+ {id:5,title:"North Opens on the Twelfth",theme:"north",speed:285,
+  blurb:"The Oct 10, 2026 drop: follow the north star to the gate.",
+  src:"@fuzzy_xrp drop, Oct 10, 2026",
+  script:"f600 d f220 r f180 u f240 g130 c f200 k f180 G440 f260 r f160 r f240 C f220 u f240 g140 d f260 o f300 k f200 G430 f500 E",
+  riddle:{q:"Another 3-letter shift. Shift each letter back 3 to read the message.",
+   cipher:"QRUWK RSHQV RQ WKH WZHOIWK",hint:"Hint: Q becomes N, R becomes O. Evernorth had announced the Oct 12 date the day before, so it's news, not a prophecy.",choices:["NORTH OPENS ON THE TWELFTH","NORTH OPENS IN THE TWILIGHT","WORTH HOPING ON THE TWELFTH"]},
+  epilogue:true}
+ // NOV 5 DROP: add chapter 6 here once the drop is posted and decoded (see the notes at the top).
+];
+// Shown as a locked chapter until the next drop is added. Remove when chapter 6 is built.
+const NEXT_DROP={id:6,title:"The Next Drop",when:"Projected Thu Nov 5, 2026, around 10:23 AM PT (13-day schedule; the Oct 23 picture also shows the plaque V·XI)."};
+
+const $=id=>document.getElementById(id);
+const cv=$("cv"),cx=cv.getContext("2d");
+const WH=540,GY=440; // world height, ground top
+let W=0,H=0,S=1,VW=480,gameH=0,portrait=true,DPR=1;
+const LS={get(k,d){try{const v=localStorage.getItem("fz589:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("fz589:"+k,JSON.stringify(v))}catch(e){}}};
+let sound=LS.get("sound",true);
+
+/* ---------- sound (quiet blips, no music) ---------- */
+let AC=null;function blip(f,d,type,vol){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||"square";o.frequency.value=f;g.gain.value=vol||0.035;o.connect(g);g.connect(AC.destination);const t=AC.currentTime;g.gain.exponentialRampToValueAtTime(0.0001,t+(d||0.1));o.start(t);o.stop(t+(d||0.1))}catch(e){}}
+
+/* ---------- layout ---------- */
+function vvH(){return Math.round((window.visualViewport&&window.visualViewport.height)||window.innerHeight)}
+function layout(){
+  W=window.innerWidth;H=vvH();DPR=Math.min(window.devicePixelRatio||1,2);
+  portrait=H>=W;
+  if(portrait){VW=480;S=W/VW;gameH=Math.round(WH*S);if(gameH>H*0.68){gameH=Math.round(H*0.68);S=gameH/WH;VW=W/S}}
+  else{S=H/WH;gameH=H;VW=Math.min(W/S,1400)}
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+"px";cv.style.height=H+"px";
+  const pad=$("pad"),pw=146,ph=140,sb=14,sr=12;
+  // Keep every button inside the VISIBLE viewport (iPhone Safari toolbar safe): place by visualViewport height.
+  const safeB=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sab"))||0;
+  pad.style.left=(W-pw-sr)+"px";pad.style.top=(H-ph-sb-safeB)+"px";
+  const tip=$("tip");tip.style.top=(portrait?gameH+14:H-60)+"px";tip.style.display=(state==="play"&&portrait)?"block":"none";
+}
+document.documentElement.style.setProperty("--sab","0");
+(function(){const d=document.createElement("div");d.style.cssText="position:fixed;bottom:0;height:env(safe-area-inset-bottom);visibility:hidden";document.body.appendChild(d);const h=d.getBoundingClientRect().height;document.documentElement.style.setProperty("--sab",String(Math.round(h)));d.remove()})();
+addEventListener("resize",layout);window.visualViewport&&visualViewport.addEventListener("resize",layout);
+
+/* ---------- level build ---------- */
+// Chunk codes: fN flat ground N long | gN small gap (jumpable) | GN wide gap (needs BRIDGE) | SN ship deck N long
+// c green-candle stairs | C candle-pillar crossing | r red candle (smash or jump) | u FUD cloud | d drop arc
+// k bridge kit | o Force orb (high, double jump) | E end gate
+let L=null;
+function build(def){
+  const lv={def,ground:[],plats:[],obs:[],drops:[],kits:[],orbs:[],ship:null,end:0,gaps:[]};
+  let x=0,lf={x:0,w:0};const toks=def.script.split(/\s+/);
+  for(const t of toks){const c=t[0],n=parseInt(t.slice(1))||0;
+    if(c==="f"){lv.ground.push({x,w:n});lf={x,w:n};x+=n}
+    else if(c==="S"){lv.ground.push({x,w:n,ship:true});lv.ship={x,w:n};
+      for(let i=0;i<5;i++){lv.obs.push({x:x+260+i*260,y:GY-120-(i%2)*40,by:GY-120-(i%2)*40,w:56,h:34,k:"u",alive:true})}
+      for(let i=0;i<6;i++)arc(lv,x+180+i*230,GY-80,4);x+=n}
+    else if(c==="g"){lv.gaps.push({x,w:n,wide:false});x+=n}
+    else if(c==="G"){lv.gaps.push({x,w:n,wide:true});x+=n}
+    else if(c==="c"){lv.ground.push({x,w:520});for(let i=0;i<3;i++){const h=50+i*45;lv.plats.push({x:x+80+i*130,y:GY-h,w:64,h,cand:true});lv.drops.push({x:x+112+i*130,y:GY-h-40,got:false})}x+=520}
+    else if(c==="C"){const w=560;lv.gaps.push({x,w,wide:false});lv.plats.push({x:x+120,y:GY-30,w:80,h:200,cand:true});lv.plats.push({x:x+320,y:GY-70,w:80,h:240,cand:true});lv.drops.push({x:x+160,y:GY-80,got:false});lv.drops.push({x:x+360,y:GY-120,got:false});x+=w}
+    else if(c==="r"){lv.obs.push({x:lf.x+lf.w*0.6,y:GY-58,w:34,h:58,k:"r",alive:true})}   // middle of the last flat, never right after a landing
+    else if(c==="u"){lv.obs.push({x:lf.x+lf.w*0.6,y:GY-84,by:GY-84,w:60,h:36,k:"u",alive:true})}
+    else if(c==="d"){arc(lv,x-200,GY-60,5)}
+    else if(c==="k"){lv.kits.push({x:x-80,y:GY-60,got:false})}
+    else if(c==="o"){lv.orbs.push({x:x-150,y:GY-250,got:false})}
+    else if(c==="E"){lv.end=x-160}
+  }
+  lv.len=x;lv.totalDrops=lv.drops.length;return lv;
+}
+function arc(lv,x0,y0,n){for(let i=0;i<n;i++){const t=i/(n-1||1);lv.drops.push({x:x0+i*34,y:y0-Math.sin(t*Math.PI)*50,got:false})}}
+
+/* ---------- player / state ---------- */
+const P={x:0,y:0,w:42,h:54,vx:0,vy:0,ground:false,jumps:0,hearts:3,inv:0,smash:0,smashCD:0,bridges:0,drops:0,orb:false,safeX:0,face:0};
+let state="title",cam=0,bridges=[],parts=[],t0=0,last=0,lvIdx=0,score=0,toastT=0,bustCount=0;
+function startLevel(i){
+  lvIdx=i;L=build(LEVELS[i]);bridges=[];parts=[];score=0;bustCount=0;
+  Object.assign(P,{x:120,y:GY-P.h,vx:0,vy:0,ground:true,jumps:0,hearts:3,inv:0,smash:0,smashCD:0,bridges:0,drops:0,orb:false,safeX:120});
+  cam=0;showOv(null);state="play";$("pad").style.display="block";$("pauseB").style.display="block";layout();
+  toast("Chapter "+LEVELS[i].id+": "+LEVELS[i].title);
+}
+function toast(s,ms){const t=$("toast");t.textContent=s;t.style.display="block";toastT=performance.now()+(ms||1800)}
+
+/* ---------- input ---------- */
+const keys={};
+function press(b){if(state!=="play")return;
+  if(b==="J"){if(P.ground||P.jumps<2){P.vy=P.jumps===0&&P.ground?-830:-720;P.jumps=P.ground?1:P.jumps+1;P.ground=false;blip(520,.08)}}
+  if(b==="A"){if(P.smashCD<=0){P.smash=.22;P.smashCD=.38;blip(220,.08,"sawtooth");smashHit()}}
+  if(b==="B"){if(P.bridges>0){P.bridges--;const gp=L.gaps.find(g=>g.wide&&g.x+g.w>P.x+P.w&&g.x<P.x+340);const bx=gp?Math.min(P.x-10,gp.x-30):P.x-10,bw=gp?(gp.x+gp.w+30-bx):520;bridges.push({x:bx,w:bw,t:0});blip(660,.15,"triangle");toast("Liquidity bridge built",900)}else{toast("Need a bridge kit (purple X box)",1200);blip(140,.1)}}
+}
+function bindBtn(id,b){const el=$(id);const on=e=>{e.preventDefault();e.stopPropagation();el.classList.add("on");press(b)};const off=e=>{e.preventDefault();el.classList.remove("on")};
+  el.addEventListener("touchstart",on,{passive:false});el.addEventListener("touchend",off,{passive:false});el.addEventListener("touchcancel",off,{passive:false});
+  el.addEventListener("mousedown",on);el.addEventListener("mouseup",off);el.addEventListener("mouseleave",()=>el.classList.remove("on"))}
+bindBtn("bJ","J");bindBtn("bA","A");bindBtn("bB","B");
+addEventListener("keydown",e=>{if(e.repeat)return;const k=e.key.toLowerCase();
+  if(k===" "||k==="arrowup"||k==="w"){e.preventDefault();press("J")}else if(k==="x"||k==="j"||k==="f"){press("A")}else if(k==="b"||k==="k"||k==="e"){press("B")}else if(k==="escape"||k==="p"){togglePause()}});
+document.addEventListener("dblclick",e=>e.preventDefault());
+document.addEventListener("gesturestart",e=>e.preventDefault());
+
+function smashHit(){const hx=P.x+P.w-6,hy=P.y-14,hw=84,hh=P.h+28;
+  for(const o of L.obs){if(o.alive&&o.x<hx+hw&&o.x+o.w>hx&&o.y<hy+hh&&o.y+o.h>hy){o.alive=false;score+=10;bustCount++;burst(o.x+o.w/2,o.y+o.h/2,o.k==="r"?"#ed362e":"#9aa0a8",14);blip(880,.06)}}}
+function burst(x,y,col,n){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*420,vy:-Math.random()*380,life:.6+Math.random()*.4,col})}
+
+/* ---------- physics ---------- */
+function solids(){const s=[];for(const g of L.ground)s.push({x:g.x,y:GY,w:g.w,h:200});for(const p of L.plats)s.push(p);for(const b of bridges)s.push({x:b.x,y:GY,w:b.w,h:14,bridge:true});return s}
+function hurt(msg){if(P.inv>0)return;P.hearts--;P.inv=1.6;blip(110,.25,"sawtooth",.05);toast(msg||"Ouch!",900);burst(P.x+P.w/2,P.y+P.h/2,"#fcdc3a",10);if(P.hearts<=0)fail()}
+function fail(){state="msg";$("pad").style.display="none";$("tip").style.display="none";
+  msg("Out of hearts","<p>Fuzzy will be back. Every great run starts again at the first green candle.</p>","TRY AGAIN",()=>startLevel(lvIdx))}
+function step(dt){
+  const def=LEVELS[lvIdx];P.inv=Math.max(0,P.inv-dt);P.smash=Math.max(0,P.smash-dt);P.smashCD=Math.max(0,P.smashCD-dt);
+  P.vx=def.speed;P.vy+=2300*dt;if(P.vy>1400)P.vy=1400;
+  const S_=solids();
+  // x move
+  const dx=P.vx*dt;P.x+=dx;
+  for(const s of S_){if(P.x<s.x+s.w&&P.x+P.w>s.x&&P.y<s.y+s.h&&P.y+P.h>s.y){
+    const feet=P.y+P.h-s.y;
+    if(feet<=12){P.y=s.y-P.h} // small step-up onto a ledge
+    else if(P.x+P.w-s.x<=dx+2){P.x=s.x-P.w} // ran into its left side: stop
+  }}
+  // y move
+  const prevY=P.y;P.y+=P.vy*dt;P.ground=false;
+  for(const s of S_){if(P.x<s.x+s.w&&P.x+P.w>s.x&&P.y<s.y+s.h&&P.y+P.h>s.y){
+    if(P.vy>=0&&prevY+P.h<=s.y+2){P.y=s.y-P.h;P.vy=0;P.ground=true;P.jumps=0;if(!s.bridge&&!s.cand)P.safeX=Math.max(s.x+10,Math.min(P.x,s.x+s.w-P.w-10))}
+    else if(P.vy<0&&prevY>=s.y+s.h-1){P.y=s.y+s.h;P.vy=0}}}
+  // fell
+  if(P.y>WH+60){const gap=L.gaps.find(g=>P.x>=g.x-60&&P.x<=g.x+g.w+60);
+    if(gap&&gap.wide&&P.bridges===0){P.bridges=1;toast("Free bridge kit: tap BRIDGE at the edge",1800)}
+    hurt("Into the drink!");if(state!=="play")return;
+    const back=gap?gap.x-170:P.safeX;P.x=Math.max(60,back);P.y=GY-P.h-2;P.vy=0;bridges=bridges.filter(b=>b.x+b.w<P.x)}
+  // obstacles
+  for(const o of L.obs){if(!o.alive)continue;if(o.k==="u"){o.y=o.by+Math.sin(performance.now()/300+o.x)*6}
+    if(P.x+6<o.x+o.w&&P.x+P.w-6>o.x&&P.y+6<o.y+o.h&&P.y+P.h>o.y+6){if(P.inv<=0){o.alive=false;hurt(o.k==="r"?"Red candle! Smash it with ACTION":"FUD cloud! Smash or jump")}}}
+  // pickups
+  const near=(a,r)=>Math.abs(P.x+P.w/2-a.x)<r&&Math.abs(P.y+P.h/2-a.y)<r+10;
+  for(const d of L.drops)if(!d.got&&near(d,26)){d.got=true;P.drops++;score+=1;blip(990,.04,"sine",.03)}
+  for(const k of L.kits)if(!k.got&&near(k,34)){k.got=true;P.bridges++;toast("Bridge kit! Tap BRIDGE at a wide gap",1500);blip(700,.12,"triangle")}
+  for(const o of L.orbs)if(!o.got&&near(o,34)){o.got=true;P.orb=true;score+=50;toast("Force orb found!",1400);blip(1200,.2,"sine",.04);burst(o.x,o.y,"#c289f4",18)}
+  for(const b of bridges)b.t+=dt;
+  for(const p of parts){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=900*dt;p.life-=dt}parts=parts.filter(p=>p.life>0);
+  cam=Math.max(0,P.x-VW*0.26);
+  if(P.x>=L.end){state="gate";P.vx=0;openGate()}
+}
+
+/* ---------- drawing ---------- */
+const TH={night:["#0b0f2a","#1e1440","#2b1b10"],grid:["#05070f","#120b2c","#1a1a1a"],islands:["#0b2a4a","#1d5b7e","#16384f"],sea:["#1b1d33","#3a3f63","#0f2c48"],north:["#040612","#10233a","#1c1c2a"]};
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+function drawBG(def){
+  const th=TH[def.theme],g=cx.createLinearGradient(0,0,0,WH);g.addColorStop(0,th[0]);g.addColorStop(1,th[1]);cx.fillStyle=g;cx.fillRect(0,0,VW,WH);
+  // stars
+  if(def.theme!=="islands"){cx.fillStyle="rgba(255,255,255,.7)";for(let i=0;i<60;i++){const sx=((rnd(i)*2000-cam*.05)%VW+VW)%VW,sy=rnd(i+9)*260;cx.fillRect(sx,sy,2,2)}}
+  if(def.theme==="north"){cx.fillStyle="#fff7c2";star(VW*.78,70,14);cx.font="bold 16px system-ui";cx.fillStyle="#fcdc3a";cx.fillText("NORTH",VW*.78-26,108);
+    cx.globalAlpha=.25;cx.fillStyle="#3be29a";for(let i=0;i<3;i++){cx.beginPath();cx.ellipse(VW*(.2+i*.3),120+i*14,180,22,-.1,0,7);cx.fill()}cx.globalAlpha=1}
+  if(def.theme==="night"){cx.fillStyle="#f2ecd0";cx.beginPath();cx.arc(VW*.82,80,28,0,7);cx.fill();cx.fillStyle=th[0];cx.beginPath();cx.arc(VW*.82+10,74,24,0,7);cx.fill()}
+  if(def.theme==="sea"){ // storm left, sun right (the BG123 ship-picture motif)
+    cx.fillStyle="#f9d649";cx.beginPath();cx.arc(VW*.86,90,30,0,7);cx.fill();
+    cx.fillStyle="rgba(40,40,60,.9)";for(let i=0;i<4;i++){cx.beginPath();cx.ellipse(70+i*50,70+(i%2)*14,60,26,0,0,7);cx.fill()}
+    if((performance.now()/900|0)%5===0){cx.strokeStyle="#fff59a";cx.lineWidth=3;cx.beginPath();cx.moveTo(120,90);cx.lineTo(100,140);cx.lineTo(124,140);cx.lineTo(104,190);cx.stroke()}}
+  if(def.theme==="grid"){cx.strokeStyle="rgba(122,209,46,.18)";cx.lineWidth=1;for(let i=0;i<20;i++){const yy=300+i*i*1.2;cx.beginPath();cx.moveTo(0,yy);cx.lineTo(VW,yy);cx.stroke()}
+    for(let i=-10;i<20;i++){const xx=((i*60-cam*.3)%VW+VW)%VW;cx.beginPath();cx.moveTo(xx,300);cx.lineTo(VW/2+(xx-VW/2)*3,WH);cx.stroke()}
+    // wall clock from the Feb 18 drop: only "23" is clear
+    cx.fillStyle="#111";cx.fillRect(VW*.62,40,130,52);cx.strokeStyle="#7ad12e";cx.strokeRect(VW*.62,40,130,52);cx.fillStyle="#7ad12e";cx.font="bold 34px ui-monospace,monospace";cx.fillText("_ _23",VW*.62+12,78)}
+  // background green candles (rising chart, hype only)
+  const base=360,par=.22;cx.save();cx.globalAlpha=.55;
+  for(let i=0;i<70;i++){const wx=i*46-(cam*par)%46,idx=i+Math.floor(cam*par/46);const trend=(idx%40)*3.2,o=base-trend-rnd(idx)*30,h=18+rnd(idx+3)*46;const up=rnd(idx+7)>.22;
+    cx.fillStyle=up?"#3fbf2a":"#b8352e";cx.fillRect(wx+6,o-h,16,h);cx.fillRect(wx+13,o-h-12,2,h+24)}
+  cx.restore();
+  if(def.theme==="islands"){cx.font="bold 40px system-ui";cx.globalAlpha=.35;const sy=["$","€","¥","£","₹","₩","₱","R$"];for(let i=0;i<14;i++){const xx=((i*190-cam*.35)%(VW+200)+VW+200)%(VW+200)-100;cx.fillStyle="#2d6a3a";cx.beginPath();cx.ellipse(xx,330,70,16,0,0,7);cx.fill();cx.fillStyle="#fcdc3a";cx.fillText(sy[i%sy.length],xx-14,318)}cx.globalAlpha=1}
+  // water for sea / islands
+  if(def.theme==="sea"||def.theme==="islands"){cx.fillStyle=def.theme==="sea"?"#14476e":"#1a6e98";cx.fillRect(0,GY+40,VW,WH);cx.strokeStyle="rgba(255,255,255,.35)";cx.lineWidth=2;for(let i=0;i<14;i++){const xx=((i*70-cam)%VW+VW)%VW;cx.beginPath();cx.arc(xx,GY+46+Math.sin(performance.now()/400+i)*3,12,Math.PI,0);cx.stroke()}}
+}
+function star(x,y,r){cx.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,rr=i%2?r*.45:r;cx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}cx.closePath();cx.fill()}
+function drawWorld(def){
+  cx.save();cx.translate(-cam,0);
+  const groundCol=def.theme==="sea"?"#6b4a2b":def.theme==="islands"?"#3c7a2e":def.theme==="grid"?"#24243a":"#3a2410";
+  for(const g of L.ground){if(g.x>cam+VW||g.x+g.w<cam)continue;
+    if(g.ship){drawShip(g);continue}
+    cx.fillStyle=groundCol;cx.fillRect(g.x,GY,g.w,WH-GY);cx.fillStyle=def.theme==="islands"?"#69c04a":def.theme==="grid"?"#7ad12e":"#5e2c07";cx.fillRect(g.x,GY,g.w,8);
+    cx.fillStyle="rgba(0,0,0,.25)";for(let i=g.x;i<g.x+g.w;i+=40)cx.fillRect(i,GY+20+((i/40)%2)*20,18,4)}
+  for(const p of L.plats){if(p.x>cam+VW||p.x+p.w<cam)continue;candle(p.x,p.y,p.w,p.h)}
+  for(const b of bridges){drawBridge(b)}
+  for(const k of L.kits)if(!k.got){cx.fillStyle="#7a38bd";cx.strokeStyle="#000";cx.lineWidth=3;cx.fillRect(k.x-16,k.y-16,32,32);cx.strokeRect(k.x-16,k.y-16,32,32);cx.fillStyle="#fff";cx.font="bold 20px system-ui";cx.fillText("X",k.x-7,k.y+7)}
+  for(const d of L.drops)if(!d.got){cx.fillStyle="#5fd0ff";cx.strokeStyle="#0b3a5a";cx.lineWidth=2;cx.beginPath();cx.moveTo(d.x,d.y-11);cx.quadraticCurveTo(d.x+9,d.y+1,d.x,d.y+8);cx.quadraticCurveTo(d.x-9,d.y+1,d.x,d.y-11);cx.fill();cx.stroke()}
+  for(const o of L.orbs)if(!o.got){const t=performance.now()/300;cx.fillStyle="#7a38bd";cx.beginPath();cx.arc(o.x,o.y+Math.sin(t)*4,16,0,7);cx.fill();cx.strokeStyle="#c289f4";cx.lineWidth=3;cx.stroke();cx.fillStyle="#fff";cx.beginPath();cx.ellipse(o.x,o.y+Math.sin(t)*4,8,5,0,0,7);cx.fill();cx.fillStyle="#000";cx.beginPath();cx.arc(o.x,o.y+Math.sin(t)*4,3,0,7);cx.fill()}
+  for(const o of L.obs){if(!o.alive)continue;if(o.k==="r"){candle(o.x,o.y,o.w,o.h,true)}else{cloud(o)}}
+  // end gate
+  gate(L.end+40,def);
+  drawFuzzy(P.x,P.y,P.w,P.h);
+  if(P.smash>0){cx.strokeStyle="rgba(255,255,255,.9)";cx.lineWidth=5;for(let i=0;i<3;i++){cx.beginPath();cx.arc(P.x+P.w+10,P.y+P.h/2,26+i*10,-.9,.9);cx.stroke()}}
+  for(const p of parts){cx.fillStyle=p.col;cx.globalAlpha=Math.max(0,p.life);cx.fillRect(p.x-3,p.y-3,6,6)}cx.globalAlpha=1;
+  cx.restore();
+}
+function candle(x,y,w,h,red){const body=red?"#ed362e":"#4fc22b",dark=red?"#7a0f0b":"#1f6a12";cx.fillStyle=dark;cx.fillRect(x+w/2-3,y-16,6,h+16);cx.fillStyle=body;cx.strokeStyle="#000";cx.lineWidth=3;cx.fillRect(x,y,w,h);cx.strokeRect(x,y,w,h);cx.fillStyle="rgba(255,255,255,.25)";cx.fillRect(x+5,y+4,6,h-8);if(red){cx.fillStyle="#fff";cx.font="bold 11px system-ui";cx.fillText("FUD",x+5,y+h/2+4)}}
+function cloud(o){cx.fillStyle="#7b8088";cx.strokeStyle="#2a2d33";cx.lineWidth=3;cx.beginPath();cx.ellipse(o.x+o.w/2,o.y+o.h/2,o.w/2,o.h/2,0,0,7);cx.ellipse(o.x+o.w*.3,o.y+o.h*.35,o.w*.28,o.h*.4,0,0,7);cx.fill();cx.stroke();cx.fillStyle="#fff";cx.font="bold 13px system-ui";cx.fillText("FUD",o.x+o.w/2-14,o.y+o.h/2+5)}
+function drawBridge(b){const t=performance.now()/200;cx.fillStyle="#7a38bd";cx.fillRect(b.x,GY,b.w,14);cx.strokeStyle="#c289f4";cx.lineWidth=2;cx.strokeRect(b.x,GY,b.w,14);
+  cx.fillStyle="#5fd0ff";for(let i=0;i<12;i++){const xx=b.x+((i*44+t*30)%b.w);cx.fillRect(xx,GY+4,10,5)}
+  cx.strokeStyle="rgba(252,220,58,.8)";cx.lineWidth=2;for(let i=0;i<=b.w;i+=50){cx.beginPath();cx.moveTo(b.x+i,GY);cx.lineTo(b.x+i,GY-24);cx.stroke()}cx.beginPath();cx.moveTo(b.x,GY-24);cx.lineTo(b.x+b.w,GY-24);cx.stroke()}
+function drawShip(g){ // the three-sail ship Perseverancia (green, purple, yellow sails)
+  cx.fillStyle="#5b3416";cx.strokeStyle="#000";cx.lineWidth=4;cx.beginPath();cx.moveTo(g.x-30,GY);cx.lineTo(g.x+g.w+60,GY);cx.lineTo(g.x+g.w-10,GY+70);cx.lineTo(g.x+20,GY+70);cx.closePath();cx.fill();cx.stroke();
+  cx.fillStyle="#8a5a2b";cx.fillRect(g.x-30,GY,g.w+90,8);
+  cx.fillStyle="#fcdc3a";cx.font="bold 22px Georgia,serif";for(let i=200;i<g.w;i+=600)cx.fillText("PERSEVERANCIA",g.x+i,GY+44);
+  const cols=["#3fbf2a","#7a38bd","#f2c230"];for(let m=0;m<3;m++){const mx=g.x+250+m*450;cx.fillStyle="#3b2410";cx.fillRect(mx,GY-260,8,260);cx.fillStyle=cols[m];cx.strokeStyle="#000";cx.lineWidth=3;cx.beginPath();cx.moveTo(mx+8,GY-250);cx.quadraticCurveTo(mx+110,GY-170,mx+8,GY-90);cx.closePath();cx.fill();cx.stroke()}
+  // crow's nest grin flag
+  cx.fillStyle="#000";cx.fillRect(g.x+700,GY-292,40,24);cx.fillStyle="#fff";cx.fillRect(g.x+706,GY-282,28,5)}
+function gate(x,def){cx.fillStyle=def.epilogue?"#8a7a5a":"#3b2410";cx.strokeStyle="#000";cx.lineWidth=4;cx.fillRect(x,GY-220,26,220);cx.fillRect(x+150,GY-220,26,220);cx.strokeRect(x,GY-220,26,220);cx.strokeRect(x+150,GY-220,26,220);
+  cx.fillStyle="#fcdc3a";cx.fillRect(x-10,GY-250,196,34);cx.strokeRect(x-10,GY-250,196,34);cx.fillStyle="#000";cx.font="bold 15px Georgia,serif";cx.fillText(def.epilogue?"SEMPER · SEPTENTRIO":"RIDDLE GATE",x+(def.epilogue?6:40),GY-228);
+  cx.fillStyle="rgba(122,209,46,.25)";cx.fillRect(x+26,GY-216,124,216)}
+function drawFuzzy(x,y,w,h){ // original drawing in the card-game style: brown scribbly bear, teal eyes, huge grin
+  if(P.inv>0&&((performance.now()/90)|0)%2)return;
+  const t=performance.now()/90,run=P.ground?Math.sin(t):0.6;cx.save();cx.translate(x+w/2,y+h);cx.lineJoin="round";
+  cx.strokeStyle="#000";cx.lineWidth=3.5;cx.fillStyle="#5e2c07";
+  // legs
+  cx.beginPath();cx.ellipse(-9+run*5,-6,6,8,0,0,7);cx.fill();cx.stroke();cx.beginPath();cx.ellipse(9-run*5,-6,6,8,0,0,7);cx.fill();cx.stroke();
+  // body
+  cx.beginPath();cx.ellipse(0,-22,16,15,0,0,7);cx.fill();cx.stroke();
+  // head
+  cx.save();cx.translate(2,-50);cx.scale(1.22,1.22);cx.beginPath();cx.moveTo(-22,-2);cx.lineTo(-24,-26);cx.lineTo(-10,-16);cx.lineTo(-4,-22);cx.lineTo(4,-17);cx.lineTo(12,-22);cx.lineTo(24,-28);cx.lineTo(22,-2);cx.quadraticCurveTo(24,16,0,18);cx.quadraticCurveTo(-24,16,-22,-2);cx.closePath();cx.fill();cx.stroke();
+  cx.lineWidth=2;cx.beginPath();for(const [fx,fy] of [[-17,6],[17,6],[-14,12],[14,12],[-6,-14],[8,-12]]){cx.moveTo(fx-3,fy-3);cx.lineTo(fx,fy+2);cx.lineTo(fx+3,fy-3)}cx.stroke();
+  // eyes
+  cx.lineWidth=2;for(const ex of [-9,9]){cx.fillStyle="#f6f2e0";cx.beginPath();cx.ellipse(ex,-6,6,5,0,0,7);cx.fill();cx.stroke();cx.fillStyle="#7fc2ef";cx.beginPath();cx.arc(ex+1,-6,3.6,0,7);cx.fill();cx.fillStyle="#000";cx.beginPath();cx.arc(ex+1,-6,2,0,7);cx.fill()}
+  // nose
+  cx.fillStyle="#222";cx.beginPath();cx.ellipse(0,1,4,3,0,0,7);cx.fill();
+  // grin
+  cx.fillStyle="#000";cx.beginPath();cx.moveTo(-17,4);cx.quadraticCurveTo(0,26,17,4);cx.quadraticCurveTo(0,9,-17,4);cx.fill();
+  cx.fillStyle="#fff";for(let i=-13;i<13;i+=3.4){cx.fillRect(i,6.2,2.6,4)}cx.beginPath();cx.moveTo(-11,7);cx.lineTo(-9,13);cx.lineTo(-7,7);cx.moveTo(7,7);cx.lineTo(9,13);cx.lineTo(11,7);cx.fill();
+  cx.fillRect(-7,15,14,2.5)
+  cx.restore();cx.restore();
+}
+function drawHUD(def){
+  cx.fillStyle="rgba(10,8,6,.75)";cx.fillRect(0,0,VW,40);cx.fillStyle="#fff";cx.font="bold 18px system-ui";
+  let s="";for(let i=0;i<3;i++)s+=i<P.hearts?"♥":"♡";cx.fillStyle="#ff5a4e";cx.fillText(s,10,27);
+  cx.fillStyle="#5fd0ff";cx.fillText("💧"+P.drops+"/"+L.totalDrops,70,27);cx.fillStyle="#c289f4";cx.fillText("X"+P.bridges,170,27);
+  if(P.orb){cx.fillStyle="#c289f4";cx.beginPath();cx.arc(222,21,8,0,7);cx.fill()}
+  const pr=Math.min(1,P.x/L.end);cx.fillStyle="#333";cx.fillRect(244,16,Math.max(40,VW-310),8);cx.fillStyle="#7ad12e";cx.fillRect(244,16,Math.max(40,VW-310)*pr,8);
+}
+function render(){
+  cx.setTransform(DPR,0,0,DPR,0,0);cx.fillStyle="#0a0806";cx.fillRect(0,0,W,H);
+  if(!L)return;
+  cx.save();cx.beginPath();cx.rect(0,0,W,gameH);cx.clip();cx.scale(S,S);const def=LEVELS[lvIdx];drawBG(def);drawWorld(def);drawHUD(def);cx.restore();
+  if(portrait){cx.fillStyle="#16110a";cx.fillRect(0,gameH,W,H-gameH);cx.fillStyle="#b8913a";cx.fillRect(0,gameH,W,2)}
+}
+function loop(ts){const dt=Math.min(.033,(ts-(last||ts))/1000);last=ts;if(state==="play"&&!window.__manual){step(dt)}render();if(toastT&&performance.now()>toastT){$("toast").style.display="none";toastT=0}requestAnimationFrame(loop)}
+
+/* ---------- overlays ---------- */
+function showOv(id){for(const o of document.querySelectorAll(".ov"))o.classList.toggle("on",o.id===id)}
+function msg(title,html,goLabel,go){$("mT").textContent=title;$("mB").innerHTML=html;$("mGo").textContent=goLabel;$("mGo").onclick=go;showOv("oMsg")}
+function openGate(){$("pad").style.display="none";$("tip").style.display="none";const def=LEVELS[lvIdx],r=def.riddle;
+  $("rT").textContent="Riddle gate "+def.id;$("rSrc").textContent="From "+def.src;$("rQ").textContent=r.q;$("rC").textContent=r.cipher;$("rHint").textContent=r.hint;
+  const ch=r.choices.map((c,i)=>({c,ok:i===0})).sort(()=>Math.random()-.5);const box=$("rCh");box.innerHTML="";
+  for(const o of ch){const b=document.createElement("button");b.type="button";b.className="choice";b.textContent=o.c;b.onclick=()=>{if(o.ok){b.classList.add("good");blip(880,.12,"triangle");blip(1320,.2,"triangle");setTimeout(()=>clearLevel(),550)}else{b.classList.add("bad");b.disabled=true;blip(150,.15)}};box.appendChild(b)}
+  showOv("oRid")}
+function clearLevel(){const def=LEVELS[lvIdx];const best=LS.get("best",{});const prev=best[def.id]||{};best[def.id]={done:true,drops:Math.max(prev.drops||0,P.drops),orb:!!(prev.orb||P.orb)};LS.set("best",best);
+  const stats="<p>Drops: <b>"+P.drops+" / "+L.totalDrops+"</b> · FUD busted: <b>"+bustCount+"</b> · Force orb: <b>"+(P.orb?"found":"missed")+"</b></p>";
+  if(def.epilogue){msg("Chapter 5 clear!",stats+"<p><b>So it begins.</b> The Oct 23, 2026 drop shows Fuzzy at a gate marked SEMPER · SEPTENTRIO with Roman-numeral plaques. One reads <b>V·XI</b>: Nov 5.</p><p class='small'>"+NEXT_DROP.when+" Chapter 6 will be built from that drop. The road isn't finished.</p>","CHAPTERS",()=>openLevels())}
+  else msg("Chapter "+def.id+" clear!",stats+"<p class='small'>Riddle source: "+def.src+".</p>","NEXT CHAPTER",()=>startLevel(lvIdx+1))}
+function openLevels(){state="menu";$("pad").style.display="none";$("pauseB").style.display="none";$("tip").style.display="none";const best=LS.get("best",{});const box=$("lvList");box.innerHTML="";
+  LEVELS.forEach((d,i)=>{const b=document.createElement("button");b.type="button";b.className="lv";const s=best[d.id];b.innerHTML="<span class='n'>"+d.id+"</span><span><b>"+d.title+(s&&s.done?" ✓":"")+"</b>"+d.blurb+"</span>";b.onclick=()=>startLevel(i);box.appendChild(b)});
+  if(typeof NEXT_DROP!=="undefined"&&NEXT_DROP){const b=document.createElement("div");b.className="lv lock";b.innerHTML="<span class='n'>🔒</span><span><b>"+NEXT_DROP.id+". "+NEXT_DROP.title+"</b>"+NEXT_DROP.when+"</span>";box.appendChild(b)}
+  showOv("oLv")}
+function togglePause(){if(state==="play"){state="pause";$("pSound").textContent="SOUND: "+(sound?"ON":"OFF");showOv("oPause")}else if(state==="pause"){state="play";showOv(null)}}
+$("tPlay").onclick=()=>{const best=LS.get("best",{});let i=LEVELS.findIndex(d=>!(best[d.id]&&best[d.id].done));startLevel(i<0?0:i)};
+$("tLv").onclick=openLevels;$("tAbout").onclick=()=>showOv("oAbout");$("abBack").onclick=()=>showOv("oTitle");$("lvBack").onclick=()=>{state="title";showOv("oTitle")};
+$("pauseB").onclick=togglePause;$("pResume").onclick=togglePause;$("pRestart").onclick=()=>startLevel(lvIdx);$("pLv").onclick=openLevels;
+$("pSound").onclick=()=>{sound=!sound;LS.set("sound",sound);$("pSound").textContent="SOUND: "+(sound?"ON":"OFF")};$("mLv").onclick=openLevels;
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&state==="play")togglePause()});
+layout();requestAnimationFrame(loop);
+window.__fz={LEVELS,NEXT_DROP,startLevel,press,step,solids,get dims(){return {W,H,S,VW,gameH,portrait}},get P(){return P},get state(){return state},get L(){return L}};
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
