@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0a0806">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Fuzzy: Road to 589 (fan game, levels 1-5)</title>
+<title>Fuzzy: Road to 589 (fan game, levels 1-6)</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -62,7 +62,7 @@ p{margin:.45em 0}
   <img class="logo" src="logo.png" alt="FIVE8NINE">
   <h1>FUZZY: ROAD TO 589</h1>
   <p class="small" style="text-align:center">Fuzzybear created by @fuzzy_dev_ · @fuzzy_xrp</p>
-  <div class="notice">Fan-made tribute game, chapters 1 to 5. Not official and not affiliated with Fuzzybear, Fuzzycards or anyone named. Not financial advice: no token, no wallet, no buying anything.</div>
+  <div class="notice">Fan-made tribute game, chapters 1 to 6 (first several levels only; the road is not finished). Not official and not affiliated with Fuzzybear, Fuzzycards or anyone named. Not financial advice: no token, no wallet, no buying anything.</div>
   <p class="small">Fuzzy runs the riddle road: hop green candles, bust red ones, build liquidity bridges between currency islands, sail the ship Perseverancia and crack real riddles at every gate.</p>
   <button class="btn go" id="tPlay" type="button">PLAY</button>
   <button class="btn" id="tLv" type="button">CHAPTERS</button>
@@ -82,7 +82,7 @@ p{margin:.45em 0}
   <p>Fuzzybear ($FUZZY) was created by <b>@fuzzy_dev_</b> and is run by the Fuzzybear team at <b>@fuzzy_xrp</b> (fuzzyxrp.com). The Fuzzy TCG card game is by Fuzzycards (fuzzycards.com). All credit for Fuzzy, his lore and his riddles goes to them.</p>
   <p>This is an unofficial fan game. All art here is drawn fresh in code in a card-game style; no official card art is used. Riddles are quoted from public posts by @fuzzy_xrp, @bearableguy123 and @321yugelbaraeb, with the dates shown at each gate.</p>
   <div class="notice">Not financial advice. Green candles here are decoration and power-ups, not a price call. The game has no token, no wallet connection and no purchases.</div>
-  <p class="small">Chapter 6 opens after the next riddle drop.</p>
+  <p class="small">Chapters 1 to 6 are built from public drops so far. More of the road may come later; the game is not complete.</p>
   <button class="btn" id="abBack" type="button">BACK</button>
 </div></div>
 
@@ -117,14 +117,15 @@ p{margin:.45em 0}
 "use strict";
 /* =====================================================================
    FUZZY: ROAD TO 589  (fan game, Peter's Arcade family copy, fully unlocked)
-   Chapters 1-5 only. The game is deliberately NOT finished.
+   Chapters 1-6 only. The game is deliberately NOT finished.
    ---------------------------------------------------------------------
-   HOW TO ADD THE NEXT DROP (projected Thu Nov 5, 2026, ~10:23 AM PT):
+   HOW TO ADD A LATER DROP:
    1. Read the new @fuzzy_xrp post and verify the decode before using it.
-   2. Copy one object in LEVELS below, give it id 6, a title, the drop
-      date and post URL in `src`, a `script` (see chunk codes in build()),
+   2. Copy one object in LEVELS below, give it the next id, a title, the
+      drop date and post URL in `src`, a `script` (chunk codes in build()),
       a `theme`, and a `riddle` {q, cipher, hint, choices:[correct,...]}.
-   3. Delete NEXT_DROP (or point it at the drop after that).
+   3. Move epilogue:true to the new last chapter; remove or retarget any
+      locked placeholder.
    4. Bump CACHE in sw.js so phones pick up the new chapter.
    ===================================================================== */
 const LEVELS=[
@@ -157,12 +158,17 @@ const LEVELS=[
   src:"@fuzzy_xrp drop, Oct 10, 2026",
   script:"f600 d f220 r f180 u f240 g130 c f200 k f180 G440 f260 r f160 r f240 C f220 u f240 g140 d f260 o f300 k f200 G430 f500 E",
   riddle:{q:"Another 3-letter shift. Shift each letter back 3 to read the message.",
-   cipher:"QRUWK RSHQV RQ WKH WZHOIWK",hint:"Hint: Q becomes N, R becomes O. Evernorth had announced the Oct 12 date the day before, so it's news, not a prophecy.",choices:["NORTH OPENS ON THE TWELFTH","NORTH OPENS IN THE TWILIGHT","WORTH HOPING ON THE TWELFTH"]},
+   cipher:"QRUWK RSHQV RQ WKH WZHOIWK",hint:"Hint: Q becomes N, R becomes O. Evernorth had announced the Oct 12 date the day before, so it's news, not a prophecy.",choices:["NORTH OPENS ON THE TWELFTH","NORTH OPENS IN THE TWILIGHT","WORTH HOPING ON THE TWELFTH"]}},
+ {id:6,title:"14 Years of Perseverance",theme:"vault",speed:295,
+  blurb:"The Nov 5, 2026 vault drop: stone 589, a keyhole, and a hex cipher.",
+  src:"@fuzzy_xrp drop, Nov 5, 2026 · https://x.com/fuzzy_xrp/status/2118408770451804523",
+  script:"f600 d f200 r f180 u f220 g120 c f180 k f160 G450 f240 r f140 r f200 u f220 C f200 k f180 G440 f260 o f240 g130 d f280 r f200 f400 E",
+  riddle:{q:"Each hex byte in the caption had its two digits swapped, then the whole text was reversed. What does it say?",
+   cipher:"54 34 E4 14 25 54 65 54 35 25 54 05 02 64 F4 02 35 25 14 54 95 02 43 13",
+   hint:"Hint: swap the two hex digits of each byte (54→45), read as letters, then reverse that string.",
+   choices:["14 YEARS OF PERSEVERANCE","14 YEARS OF PERSISTENCE","41 YEARS OF PERSEVERANCE"]},
   epilogue:true}
- // NOV 5 DROP: add chapter 6 here once the drop is posted and decoded (see the notes at the top).
 ];
-// Shown as a locked chapter until the next drop is added. Remove when chapter 6 is built.
-const NEXT_DROP={id:6,title:"The Next Drop",when:"Projected Thu Nov 5, 2026, around 10:23 AM PT (13-day schedule; the Oct 23 picture also shows the plaque V·XI)."};
 
 const $=id=>document.getElementById(id);
 const cv=$("cv"),cx=cv.getContext("2d");
@@ -292,7 +298,7 @@ function step(dt){
 }
 
 /* ---------- drawing ---------- */
-const TH={night:["#0b0f2a","#1e1440","#2b1b10"],grid:["#05070f","#120b2c","#1a1a1a"],islands:["#0b2a4a","#1d5b7e","#16384f"],sea:["#1b1d33","#3a3f63","#0f2c48"],north:["#040612","#10233a","#1c1c2a"]};
+const TH={night:["#0b0f2a","#1e1440","#2b1b10"],grid:["#05070f","#120b2c","#1a1a1a"],islands:["#0b2a4a","#1d5b7e","#16384f"],sea:["#1b1d33","#3a3f63","#0f2c48"],north:["#040612","#10233a","#1c1c2a"],vault:["#0c0a08","#1a1410","#2a2218"]};
 function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
 function drawBG(def){
   const th=TH[def.theme],g=cx.createLinearGradient(0,0,0,WH);g.addColorStop(0,th[0]);g.addColorStop(1,th[1]);cx.fillStyle=g;cx.fillRect(0,0,VW,WH);
@@ -300,6 +306,9 @@ function drawBG(def){
   if(def.theme!=="islands"){cx.fillStyle="rgba(255,255,255,.7)";for(let i=0;i<60;i++){const sx=((rnd(i)*2000-cam*.05)%VW+VW)%VW,sy=rnd(i+9)*260;cx.fillRect(sx,sy,2,2)}}
   if(def.theme==="north"){cx.fillStyle="#fff7c2";star(VW*.78,70,14);cx.font="bold 16px system-ui";cx.fillStyle="#fcdc3a";cx.fillText("NORTH",VW*.78-26,108);
     cx.globalAlpha=.25;cx.fillStyle="#3be29a";for(let i=0;i<3;i++){cx.beginPath();cx.ellipse(VW*(.2+i*.3),120+i*14,180,22,-.1,0,7);cx.fill()}cx.globalAlpha=1}
+  if(def.theme==="vault"){cx.fillStyle="rgba(60,48,32,.55)";for(let i=0;i<8;i++){const xx=((i*90-cam*.08)%VW+VW)%VW;cx.fillRect(xx,40,70,WH-80);cx.strokeStyle="rgba(0,0,0,.35)";cx.strokeRect(xx,40,70,WH-80)}
+    cx.fillStyle="#fcdc3a";cx.font="bold 48px Impact,system-ui";cx.globalAlpha=.22;cx.fillText("589",VW*.5-54,160);cx.globalAlpha=1;
+    cx.fillStyle="#3be29a";cx.globalAlpha=.35;for(let i=0;i<12;i++){const xx=((i*48+performance.now()/40)%(VW+60))-30;cx.font="bold 18px ui-monospace,monospace";cx.fillText("3",xx,200+((i*37)%80))}cx.globalAlpha=1}
   if(def.theme==="night"){cx.fillStyle="#f2ecd0";cx.beginPath();cx.arc(VW*.82,80,28,0,7);cx.fill();cx.fillStyle=th[0];cx.beginPath();cx.arc(VW*.82+10,74,24,0,7);cx.fill()}
   if(def.theme==="sea"){ // storm left, sun right (the BG123 ship-picture motif)
     cx.fillStyle="#f9d649";cx.beginPath();cx.arc(VW*.86,90,30,0,7);cx.fill();
@@ -321,7 +330,7 @@ function drawBG(def){
 function star(x,y,r){cx.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,rr=i%2?r*.45:r;cx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}cx.closePath();cx.fill()}
 function drawWorld(def){
   cx.save();cx.translate(-cam,0);
-  const groundCol=def.theme==="sea"?"#6b4a2b":def.theme==="islands"?"#3c7a2e":def.theme==="grid"?"#24243a":"#3a2410";
+  const groundCol=def.theme==="sea"?"#6b4a2b":def.theme==="islands"?"#3c7a2e":def.theme==="grid"?"#24243a":def.theme==="vault"?"#2a2218":"#3a2410";
   for(const g of L.ground){if(g.x>cam+VW||g.x+g.w<cam)continue;
     if(g.ship){drawShip(g);continue}
     cx.fillStyle=groundCol;cx.fillRect(g.x,GY,g.w,WH-GY);cx.fillStyle=def.theme==="islands"?"#69c04a":def.theme==="grid"?"#7ad12e":"#5e2c07";cx.fillRect(g.x,GY,g.w,8);
@@ -400,11 +409,10 @@ function openGate(){$("pad").style.display="none";$("tip").style.display="none";
   showOv("oRid")}
 function clearLevel(){const def=LEVELS[lvIdx];const best=LS.get("best",{});const prev=best[def.id]||{};best[def.id]={done:true,drops:Math.max(prev.drops||0,P.drops),orb:!!(prev.orb||P.orb)};LS.set("best",best);
   const stats="<p>Drops: <b>"+P.drops+" / "+L.totalDrops+"</b> · FUD busted: <b>"+bustCount+"</b> · Force orb: <b>"+(P.orb?"found":"missed")+"</b></p>";
-  if(def.epilogue){msg("Chapter 5 clear!",stats+"<p><b>So it begins.</b> The Oct 23, 2026 drop shows Fuzzy at a gate marked SEMPER · SEPTENTRIO with Roman-numeral plaques. One reads <b>V·XI</b>: Nov 5.</p><p class='small'>"+NEXT_DROP.when+" Chapter 6 will be built from that drop. The road isn't finished.</p>","CHAPTERS",()=>openLevels())}
+  if(def.epilogue){msg("Chapter "+def.id+" clear!",stats+"<p><b>14 years of perseverance.</b> The Nov 5, 2026 drop opened a stone vault of 589 with a keyhole and a hex cipher that swaps and reverses to that line.</p><p class='small'>Only the first several levels are built (chapters 1 to 6). The road isn't finished.</p>","CHAPTERS",()=>openLevels())}
   else msg("Chapter "+def.id+" clear!",stats+"<p class='small'>Riddle source: "+def.src+".</p>","NEXT CHAPTER",()=>startLevel(lvIdx+1))}
 function openLevels(){state="menu";$("pad").style.display="none";$("pauseB").style.display="none";$("tip").style.display="none";const best=LS.get("best",{});const box=$("lvList");box.innerHTML="";
   LEVELS.forEach((d,i)=>{const b=document.createElement("button");b.type="button";b.className="lv";const s=best[d.id];b.innerHTML="<span class='n'>"+d.id+"</span><span><b>"+d.title+(s&&s.done?" ✓":"")+"</b>"+d.blurb+"</span>";b.onclick=()=>startLevel(i);box.appendChild(b)});
-  if(typeof NEXT_DROP!=="undefined"&&NEXT_DROP){const b=document.createElement("div");b.className="lv lock";b.innerHTML="<span class='n'>🔒</span><span><b>"+NEXT_DROP.id+". "+NEXT_DROP.title+"</b>"+NEXT_DROP.when+"</span>";box.appendChild(b)}
   showOv("oLv")}
 function togglePause(){if(state==="play"){state="pause";$("pSound").textContent="SOUND: "+(sound?"ON":"OFF");showOv("oPause")}else if(state==="pause"){state="play";showOv(null)}}
 $("tPlay").onclick=()=>{const best=LS.get("best",{});let i=LEVELS.findIndex(d=>!(best[d.id]&&best[d.id].done));startLevel(i<0?0:i)};
@@ -413,7 +421,7 @@ $("pauseB").onclick=togglePause;$("pResume").onclick=togglePause;$("pRestart").o
 $("pSound").onclick=()=>{sound=!sound;LS.set("sound",sound);$("pSound").textContent="SOUND: "+(sound?"ON":"OFF")};$("mLv").onclick=openLevels;
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&state==="play")togglePause()});
 layout();requestAnimationFrame(loop);
-window.__fz={LEVELS,NEXT_DROP,startLevel,press,step,solids,get dims(){return {W,H,S,VW,gameH,portrait}},get P(){return P},get state(){return state},get L(){return L}};
+window.__fz={LEVELS,startLevel,press,step,solids,get dims(){return {W,H,S,VW,gameH,portrait}},get P(){return P},get state(){return state},get L(){return L}};
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
